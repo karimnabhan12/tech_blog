@@ -1,0 +1,517 @@
+---
+import BlogLayout from '../layouts/BlogLayout.astro';
+import BlogCard from '../components/BlogCard.astro';
+import { getAllBlogPosts } from '../lib/supabase';
+
+const posts = await getAllBlogPosts();
+const featuredPost = posts[0];
+const latestPosts = posts.slice(1, 7);
+
+const categories = [
+  { name: 'Artificial Intelligence', icon: '🤖', color: '#3b82f6' },
+  { name: 'Cloud Computing', icon: '☁️', color: '#06b6d4' },
+  { name: 'Cybersecurity', icon: '🔒', color: '#ef4444' },
+  { name: 'Web Development', icon: '💻', color: '#10b981' },
+];
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+};
+---
+
+<BlogLayout title="TechPulse - Premium Tech Insights">
+  <section class="hero">
+    <div class="hero-container">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          Premium Tech Insights for Modern Developers
+        </h1>
+        <p class="hero-subtitle">
+          Deep dives into AI, cloud computing, security, and web development from industry experts.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {featuredPost && (
+    <section class="featured">
+      <div class="container">
+        <h2 class="section-title">Featured Article</h2>
+        <article class="featured-card">
+          <a href={`/blog/${featuredPost.slug}`} class="featured-link">
+            <div class="featured-image-wrapper">
+              <img
+                src={featuredPost.cover_image_url}
+                alt={featuredPost.title}
+                class="featured-image"
+                loading="eager"
+              />
+              <span class="featured-badge">Featured</span>
+            </div>
+            <div class="featured-content">
+              <span class="featured-category">{featuredPost.category}</span>
+              <h3 class="featured-title">{featuredPost.title}</h3>
+              <p class="featured-excerpt">{featuredPost.excerpt}</p>
+              <div class="featured-meta">
+                <div class="featured-author">
+                  <img
+                    src={featuredPost.author.avatar_url}
+                    alt={featuredPost.author.name}
+                    class="featured-author-avatar"
+                    loading="lazy"
+                  />
+                  <div class="featured-author-info">
+                    <span class="featured-author-name">{featuredPost.author.name}</span>
+                    <div class="featured-meta-details">
+                      <time datetime={featuredPost.published_at}>
+                        {formatDate(featuredPost.published_at)}
+                      </time>
+                      <span>·</span>
+                      <span>{featuredPost.read_time_minutes} min read</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </article>
+      </div>
+    </section>
+  )}
+
+  <section class="latest" id="latest">
+    <div class="container">
+      <h2 class="section-title">Latest Articles</h2>
+      <div class="blog-grid">
+        {latestPosts.map(post => (
+          <BlogCard
+            title={post.title}
+            excerpt={post.excerpt}
+            coverImage={post.cover_image_url}
+            slug={post.slug}
+            category={post.category}
+            readTime={post.read_time_minutes}
+            publishedAt={post.published_at}
+            author={{
+              name: post.author.name,
+              avatar_url: post.author.avatar_url
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="categories" id="categories">
+    <div class="container">
+      <h2 class="section-title">Explore by Category</h2>
+      <div class="category-grid">
+        {categories.map(category => (
+          <div class="category-card">
+            <div class="category-icon" style={`background: ${category.color}15; color: ${category.color};`}>
+              <span class="category-emoji">{category.icon}</span>
+            </div>
+            <h3 class="category-name">{category.name}</h3>
+            <p class="category-count">
+              {posts.filter(p => p.category === category.name).length} articles
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <div class="cta-content">
+        <h2 class="cta-title">Stay Updated</h2>
+        <p class="cta-text">
+          Get the latest tech insights delivered to your inbox. No spam, just quality content.
+        </p>
+      </div>
+    </div>
+  </section>
+</BlogLayout>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    padding: 96px 24px 96px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+      radial-gradient(circle at 20% 50%, rgba(37, 99, 235, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .hero-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .hero-title {
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: white;
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-subtitle {
+    font-size: 20px;
+    line-height: 1.6;
+    color: #cbd5e1;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .section-title {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 48px;
+    color: var(--color-text);
+    letter-spacing: -0.02em;
+  }
+
+  .featured {
+    padding: 64px 0;
+  }
+
+  .featured-card {
+    background: var(--color-card-bg);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    transition: var(--transition);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .featured-card:hover {
+    box-shadow: var(--shadow-xl);
+    border-color: var(--color-primary);
+  }
+
+  .featured-link {
+    text-decoration: none;
+    color: inherit;
+    display: contents;
+  }
+
+  .featured-image-wrapper {
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    min-height: 400px;
+  }
+
+  .featured-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+  }
+
+  .featured-card:hover .featured-image {
+    transform: scale(1.05);
+  }
+
+  .featured-badge {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .featured-content {
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .featured-category {
+    display: inline-block;
+    color: var(--color-primary);
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+  }
+
+  .featured-title {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 16px;
+    color: var(--color-text);
+    transition: var(--transition);
+  }
+
+  .featured-card:hover .featured-title {
+    color: var(--color-primary);
+  }
+
+  .featured-excerpt {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    margin-bottom: 32px;
+  }
+
+  .featured-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .featured-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .featured-author-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-border);
+  }
+
+  .featured-author-name {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 4px;
+  }
+
+  .featured-meta-details {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--color-text-tertiary);
+  }
+
+  .latest {
+    padding: 64px 0;
+    background: var(--color-bg-secondary);
+  }
+
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 32px;
+  }
+
+  .categories {
+    padding: 64px 0;
+  }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+  }
+
+  .category-card {
+    background: var(--color-card-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    transition: var(--transition);
+    cursor: pointer;
+  }
+
+  .category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-primary);
+  }
+
+  .category-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 36px;
+  }
+
+  .category-name {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--color-text);
+  }
+
+  .category-count {
+    font-size: 14px;
+    color: var(--color-text-tertiary);
+  }
+
+  .cta {
+    padding: 96px 0;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+      radial-gradient(circle at 30% 50%, rgba(37, 99, 235, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 70% 50%, rgba(16, 185, 129, 0.15) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .cta-content {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+  }
+
+  .cta-title {
+    font-size: 40px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+
+  .cta-text {
+    font-size: 18px;
+    line-height: 1.6;
+    color: #cbd5e1;
+  }
+
+  @media (max-width: 1024px) {
+    .featured-card {
+      grid-template-columns: 1fr;
+    }
+
+    .featured-image-wrapper {
+      min-height: 300px;
+    }
+
+    .blog-grid {
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      padding: 64px 16px;
+    }
+
+    .hero-title {
+      font-size: 36px;
+    }
+
+    .hero-subtitle {
+      font-size: 16px;
+    }
+
+    .section-title {
+      font-size: 28px;
+      margin-bottom: 32px;
+    }
+
+    .featured {
+      padding: 48px 0;
+    }
+
+    .featured-content {
+      padding: 32px 24px;
+    }
+
+    .featured-title {
+      font-size: 24px;
+    }
+
+    .featured-excerpt {
+      font-size: 16px;
+      margin-bottom: 24px;
+    }
+
+    .latest {
+      padding: 48px 0;
+    }
+
+    .blog-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .categories {
+      padding: 48px 0;
+    }
+
+    .category-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .cta {
+      padding: 64px 16px;
+    }
+
+    .cta-title {
+      font-size: 28px;
+    }
+
+    .cta-text {
+      font-size: 16px;
+    }
+  }
+</style>
